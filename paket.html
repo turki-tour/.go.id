@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paket Tour - Istanbul Turki Tour Amanah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .package-card { transition: all 0.3s ease; }
+        .package-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; }
+        .floating-chat { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
+        .chat-window { position: fixed; bottom: 90px; right: 20px; width: 350px; height: 450px; background: white; border-radius: 10px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); display: none; z-index: 999; }
+        .chat-header { background: #2563eb; color: white; padding: 15px; border-radius: 10px 10px 0 0; font-weight: bold; }
+        .chat-messages { height: 300px; overflow-y: auto; padding: 15px; }
+        .chat-input { padding: 15px; border-top: 1px solid #eee; }
+        .chat-input input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .star-rating { color: #fbbf24; }
+        .promo-badge { 
+            background: linear-gradient(45deg, #ff0000, #ff6b6b);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBke9Ik-8xABtAC9JA0KH8iHr6Bg4sdTZc",
+            authDomain: "tiket-pesawat-50dfa.firebaseapp.com",
+            projectId: "tiket-pesawat-50dfa",
+            storageBucket: "tiket-pesawat-50dfa.firebasestorage.app",
+            messagingSenderId: "1016909159363",
+            appId: "1:1016909159363:web:b448a2377af54cded33b76",
+            measurementId: "G-R8R9F7Z1YY"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // Check authentication
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('loginBtn').style.display = 'none';
+                document.getElementById('userMenu').style.display = 'flex';
+            }
+        });
+    </script>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <img src="https://thumbs.dreamstime.com/b/timbre-d-istanbul-de-l-a%C3%A9roport-atat%C3%BCrk-illustration-vecteur-logo-avec-le-drapeau-du-pays-205063683.jpg" alt="Logo" class="h-10 w-10 rounded-full">
+                    <span class="ml-3 text-xl font-bold text-blue-800">Istanbul Turki Tour Amanah</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="text-gray-600 hover:text-blue-600">Beranda</a>
+                    <a href="#" class="text-blue-600 font-medium">Paket</a>
+                    <a href="informasi.html" class="text-gray-600 hover:text-blue-600">Informasi</a>
+                    <button id="loginBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Masuk
+                    </button>
+                    <div id="userMenu" class="hidden items-center space-x-4">
+                        <a href="dashboard.html" class="text-gray-600 hover:text-blue-600">Dashboard</a>
+                        <a href="profil.html" class="text-gray-600 hover:text-blue-600">Profil</a>
+                        <button id="logoutBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Keluar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- Hero Section -->
+    <section class="bg-cover bg-center h-64 flex items-center justify-center text-white" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1543246913-6f6a90364c4c?ixlib=rb-4.0.3');">
+        <div class="text-center">
+            <h1 class="text-4xl font-bold mb-4">Paket Tour Turki</h1>
+            <p class="text-xl">Pilihan paket terbaik untuk perjalanan Anda</p>
+        </div>
+    </section>
+    <!-- Package Tabs -->
+    <section class="py-8 px-4 max-w-7xl mx-auto">
+        <div class="flex flex-wrap justify-center mb-8">
+            <button class="px-6 py-3 font-bold tab-active" onclick="showPackage('all')">Semua Paket</button>
+            <button class="px-6 py-3 font-bold text-gray-600 hover:text-blue-600" onclick="showPackage('budget')">Budget</button>
+            <button class="px-6 py-3 font-bold text-gray-600 hover:text-blue-600" onclick="showPackage('premium')">Premium</button>
+            <button class="px-6 py-3 font-bold text-gray-600 hover:text-blue-600" onclick="showPackage('family')">Family</button>
+            <button class="px-6 py-3 font-bold text-gray-600 hover:text-blue-600" onclick="showPackage('kerja')">Visa Kerja</button>
+        </div>
+    </section>
+    <!-- Packages -->
+    <section class="pb-12 px-4 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Budget Package -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden package-card" data-category="budget">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3" alt="Budget Package" class="h-48 w-full object-cover">
+                    <span class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold">Budget</span>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2">Turki Hemat 5 Hari</h3>
+                    <p class="text-gray-600 mb-4">Paket ekonomis untuk menjelajahi keindahan Istanbul</p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Hotel bintang 3 (4 malam)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Tiket pesawat PP</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Tour guide</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Transportasi</li>
+                    </ul>
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <p class="text-gray-600 line-through">Rp 12.000.000</p>
+                            <p class="text-2xl font-bold text-blue-600">Rp 9.500.000</p>
+                            <p class="text-sm text-gray-500">per orang</p>
+                        </div>
+                        <button onclick="pesanPaket('Turki Hemat 5 Hari')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                            Pesan
+                        </button>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <p><i class="fas fa-shopping-cart mr-1"></i> Terjual: <span class="font-bold">9.245</span></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Premium Package -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden package-card" data-category="premium">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1543246913-6f6a90364c4c?ixlib=rb-4.0.3" alt="Premium Package" class="h-48 w-full object-cover">
+                    <span class="absolute top-4 right-4 bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold">Premium</span>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2">Turki Mewah 7 Hari</h3>
+                    <p class="text-gray-600 mb-4">Pengalaman mewah dengan hotel bintang 5 dan layanan VIP</p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Hotel bintang 5 (6 malam)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Tiket pesawat business class</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Tour guide pribadi</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Transportasi mewah</li>
+                    </ul>
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <p class="text-gray-600 line-through">Rp 25.000.000</p>
+                            <p class="text-2xl font-bold text-blue-600">Rp 20.000.000</p>
+                            <p class="text-sm text-gray-500">per orang</p>
+                        </div>
+                        <button onclick="pesanPaket('Turki Mewah 7 Hari')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                            Pesan
+                        </button>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <p><i class="fas fa-shopping-cart mr-1"></i> Terjual: <span class="font-bold">9.876</span></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Family Package -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden package-card" data-category="family">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3" alt="Family Package" class="h-48 w-full object-cover">
+                    <span class="absolute top-4 right-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-bold">Family</span>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2">Turki Keluarga 6 Hari</h3>
+                    <p class="text-gray-600 mb-4">Paket ramah keluarga dengan aktivitas untuk semua usia</p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Hotel family (5 malam)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Tiket pesawat PP</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Tour guide keluarga</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Transportasi</li>
+                    </ul>
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <p class="text-gray-600 line-through">Rp 18.000.000</p>
+                            <p class="text-2xl font-bold text-blue-600">Rp 15.000.000</p>
+                            <p class="text-sm text-gray-500">per orang</p>
+                        </div>
+                        <button onclick="pesanPaket('Turki Keluarga 6 Hari')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                            Pesan
+                        </button>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <p><i class="fas fa-shopping-cart mr-1"></i> Terjual: <span class="font-bold">9.532</span></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Special Package -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden package-card" data-category="premium">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?ixlib=rb-4.0.3" alt="Special Package" class="h-48 w-full object-cover">
+                    <span class="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">Spesial</span>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2">Paket Lengkap Turki</h3>
+                    <p class="text-gray-600 mb-4">All-inclusive dengan visa, tiket, dan hotel bintang 4</p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Hotel bintang 4 (7 malam)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Tiket pesawat PP</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Visa Turki</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Tour guide & transportasi</li>
+                    </ul>
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <p class="text-gray-600 line-through">Rp 18.500.000</p>
+                            <p class="text-2xl font-bold text-blue-600">Rp 13.500.000</p>
+                            <p class="text-sm text-gray-500">per orang</p>
+                        </div>
+                        <button onclick="pesanPaket('Paket Lengkap Turki')" class="bg-yellow-500 text-blue-900 px-4 py-2 rounded-lg font-bold hover:bg-yellow-400 transition">
+                            Pesan
+                        </button>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <p><i class="fas fa-shopping-cart mr-1"></i> Terjual: <span class="font-bold">10.245</span></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Honeymoon Package -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden package-card" data-category="premium">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3" alt="Honeymoon Package" class="h-48 w-full object-cover">
+                    <span class="absolute top-4 right-4 bg-pink-500 text-white px-3 py-1 rounded-full text-sm font-bold">Honeymoon</span>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2">Bulan Madu Romantis</h3>
+                    <p class="text-gray-600 mb-4">Paket romantis dengan dinner cruise dan spa mewah</p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Hotel bintang 5 (6 malam)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Tiket pesawat business class</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Dinner cruise di Bosphorus</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Couple spa treatment</li>
+                    </ul>
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <p class="text-gray-600 line-through">Rp 30.000.000</p>
+                            <p class="text-2xl font-bold text-blue-600">Rp 25.000.000</p>
+                            <p class="text-sm text-gray-500">per pasangan</p>
+                        </div>
+                        <button onclick="pesanPaket('Bulan Madu Romantis')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                            Pesan
+                        </button>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <p><i class="fas fa-shopping-cart mr-1"></i> Terjual: <span class="font-bold">9.123</span></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Adventure Package -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden package-card" data-category="budget">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3" alt="Adventure Package" class="h-48 w-full object-cover">
+                    <span class="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">Adventure</span>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2">Turki Petualangan 8 Hari</h3>
+                    <p class="text-gray-600 mb-4">Jelajahi Cappadocia dengan hot air balloon dan hiking</p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Hotel bintang 3 (7 malam)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Tiket pesawat PP</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Hot air balloon ride</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Hiking tour</li>
+                    </ul>
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <p class="text-gray-600 line-through">Rp 16.000.000</p>
+                            <p class="text-2xl font-bold text-blue-600">Rp 13.000.000</p>
+                            <p class="text-sm text-gray-500">per orang</p>
+                        </div>
+                        <button onclick="pesanPaket('Turki Petualangan 8 Hari')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                            Pesan
+                        </button>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <p><i class="fas fa-shopping-cart mr-1"></i> Terjual: <span class="font-bold">9.789</span></p>
+                    </div>
+                </div>
+            </div>
+            <!-- MODIFIED: Visa Kerja Package -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden package-card" data-category="kerja">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3" alt="Visa Kerja Package" class="h-48 w-full object-cover">
+                    <span class="absolute top-4 right-4 bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-bold">Visa Kerja</span>
+                    <span class="absolute top-4 left-4 promo-badge text-white px-3 py-1 rounded-full text-sm font-bold">PROMO 1 JT</span>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2">Paket Lengkap Sekali Jalan</h3>
+                    <p class="text-gray-600 mb-4">Dapatkan visa kerja jangka pendek dengan segala kemudahan</p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Visa kerja jangka pendek</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Tiket pesawat sekali jalan (bukan PP)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Handle bandara</li>
+                        <li class="flex items-center text-gray-400"><i class="fas fa-times text-red-500 mr-2"></i> Tanpa akomodasi</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> 100% segalanya terjamin</li>
+                    </ul>
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <p class="text-gray-600 line-through">Rp 15.000.000</p>
+                            <p class="text-2xl font-bold text-blue-600">Rp 9.000.000</p>
+                            <p class="text-sm text-gray-500">per orang</p>
+                            <p class="text-sm text-green-600 font-bold">+1 anak: Rp 10.000.000</p>
+                        </div>
+                        <button onclick="pesanPaket('Paket Lengkap Sekali Jalan')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                            Pesan
+                        </button>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <p><i class="fas fa-shopping-cart mr-1"></i> Terjual: <span class="font-bold">19.000</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Reviews Section -->
+        <div class="mt-16 bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold mb-6 text-center">Ulasan Pelanggan</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="border rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <div class="star-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="ml-2 font-bold">5.0</span>
+                    </div>
+                    <p class="text-gray-700 mb-2">"Paket visa kerja sangat membantu! Proses cepat dan pelayanan ramah."</p>
+                    <p class="text-sm text-gray-500"><i class="fas fa-map-marker-alt mr-1"></i> Bali - I Made Sutawan</p>
+                </div>
+                
+                <div class="border rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <div class="star-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="ml-2 font-bold">5.0</span>
+                    </div>
+                    <p class="text-gray-700 mb-2">"Perjalanan keluarga sangat menyenangkan! Anak-anak senang dengan tour guidenya."</p>
+                    <p class="text-sm text-gray-500"><i class="fas fa-map-marker-alt mr-1"></i> Batam - Siti Nurhaliza</p>
+                </div>
+                
+                <div class="border rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <div class="star-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="ml-2 font-bold">5.0</span>
+                    </div>
+                    <p class="text-gray-700 mb-2">"Paket honeymoon romantis banget! Dinner cruise di Bosphorus unforgettable!"</p>
+                    <p class="text-sm text-gray-500"><i class="fas fa-map-marker-alt mr-1"></i> Bali - Dewi Lestari</p>
+                </div>
+                
+                <div class="border rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <div class="star-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="ml-2 font-bold">5.0</span>
+                    </div>
+                    <p class="text-gray-700 mb-2">"Handle bandara sangat memudahkan, tidak perlu repot sama sekali!"</p>
+                    <p class="text-sm text-gray-500"><i class="fas fa-map-marker-alt mr-1"></i> Batam - Ahmad Fauzi</p>
+                </div>
+            </div>
+            <div class="text-center mt-6">
+                <p class="text-gray-600">Total <span class="font-bold">20 ulasan</span> dari pelanggan kami</p>
+                <p class="text-gray-600">Kebanyakan dari <span class="font-bold">Bali dan Batam</span></p>
+            </div>
+        </div>
+    </section>
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center mb-4">
+                        <img src="https://thumbs.dreamstime.com/b/timbre-d-istanbul-de-l-a%C3%A9roport-atat%C3%BCrk-illustration-vecteur-logo-avec-le-drapeau-du-pays-205063683.jpg" alt="Logo" class="h-10 w-10 rounded-full">
+                        <span class="ml-3 text-xl font-bold">Istanbul Turki Tour Amanah</span>
+                    </div>
+                    <p class="text-gray-400">Penyedia layanan perjalanan terpercaya ke Turki sejak 2010</p>
+                    
+                    <!-- Partner Logos -->
+                    <div class="flex items-center space-x-4 mt-6">
+                        <div class="text-center">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/OJK_Logo.png" alt="OJK" class="h-12 mx-auto">
+                            <p class="text-xs mt-1">Diawasi OJK</p>
+                        </div>
+                        <div class="text-center">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Turkish_Airlines_logo_2019_compact.svg/1024px-Turkish_Airlines_logo_2019_compact.svg.png" alt="Turkish Airlines" class="h-12 mx-auto">
+                            <p class="text-xs mt-1">Partner Resmi</p>
+                        </div>
+                        <div class="text-center">
+                            <img src="https://puspitur.com/wp-content/uploads/2024/04/cropped-logo-puspitur-.png" alt="PPI Turki" class="h-12 mx-auto">
+                            <p class="text-xs mt-1">PPI Turki</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="text-lg font-bold mb-4">Layanan</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white">Paket Tour</a></li>
+                            <li><a href="informasi.html" class="text-gray-400 hover:text-white">Informasi Turki</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white">Pemesanan Tiket</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold mb-4">Kontak</h4>
+                        <ul class="space-y-2">
+                            <li class="flex items-center"><i class="fas fa-phone mr-2"></i> +62 812-3456-7890</li>
+                            <li class="flex items-center"><i class="fas fa-envelope mr-2"></i> info@istanbultour.com</li>
+                            <li class="flex items-center"><i class="fas fa-map-marker-alt mr-2"></i> Jakarta, Indonesia</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+                <p>&copy; 2023 Istanbul Turki Tour Amanah. Hak Cipta Dilindungi.</p>
+            </div>
+        </div>
+    </footer>
+    <!-- Floating Chat Button -->
+    <div class="floating-chat">
+        <button onclick="toggleChat()" class="bg-blue-600 text-white rounded-full p-4 shadow-lg hover:bg-blue-700 transition">
+            <i class="fas fa-comments text-xl"></i>
+        </button>
+    </div>
+    <!-- Chat Window -->
+    <div id="chatWindow" class="chat-window">
+        <div class="chat-header">
+            <i class="fas fa-robot mr-2"></i> Chat Assistant
+            <button onclick="toggleChat()" class="float-right text-white hover:text-gray-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="chatMessages" class="chat-messages">
+            <div class="mb-4">
+                <div class="bg-gray-100 rounded-lg p-3 inline-block">
+                    <p>Halo! Saya asisten virtual Istanbul Turki Tour Amanah. Ada yang bisa saya bantu?</p>
+                </div>
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Ketik pesan Anda..." onkeypress="handleChatInput(event)">
+            <button onclick="sendMessage()" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">
+                Kirim
+            </button>
+        </div>
+    </div>
+    <script>
+        // Package filter functionality
+        function showPackage(category) {
+            const packages = document.querySelectorAll('.package-card');
+            const tabs = document.querySelectorAll('button');
+            
+            // Update active tab
+            tabs.forEach(tab => {
+                if (tab.textContent.toLowerCase().includes(category) || (category === 'all' && tab.textContent.includes('Semua'))) {
+                    tab.classList.add('tab-active');
+                    tab.classList.remove('text-gray-600');
+                } else {
+                    tab.classList.remove('tab-active');
+                    tab.classList.add('text-gray-600');
+                }
+            });
+            
+            // Show/hide packages
+            packages.forEach(pkg => {
+                if (category === 'all' || pkg.dataset.category === category) {
+                    pkg.style.display = 'block';
+                } else {
+                    pkg.style.display = 'none';
+                }
+            });
+        }
+        
+        // WhatsApp booking function
+        function pesanPaket(namaPaket) {
+            const whatsappNumber = "6285624675208";
+            const message = `Halo, saya tertarik dengan paket "${namaPaket}". Mohon informasi lebih lanjut.`;
+            const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappURL, '_blank');
+        }
+        
+        // Chat functionality
+        function toggleChat() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.style.display = chatWindow.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const messages = document.getElementById('chatMessages');
+            
+            if (input.value.trim() === '') return;
+            
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'mb-4 text-right';
+            userMsg.innerHTML = `
+                <div class="bg-blue-600 text-white rounded-lg p-3 inline-block">
+                    <p>${input.value}</p>
+                </div>
+            `;
+            messages.appendChild(userMsg);
+            
+            // Clear input
+            const userMessage = input.value;
+            input.value = '';
+            
+            // Simulate bot response
+            setTimeout(() => {
+                const botMsg = document.createElement('div');
+                botMsg.className = 'mb-4';
+                
+                let response = '';
+                if (userMessage.toLowerCase().includes('harga') || userMessage.toLowerCase().includes('biaya')) {
+                    response = 'Untuk informasi harga, silakan lihat paket-paket yang tersedia di halaman ini. Setiap paket memiliki harga yang berbeda sesuai fasilitasnya.';
+                } else if (userMessage.toLowerCase().includes('visa')) {
+                    response = 'Kami menyediakan layanan pengurusan visa untuk Turki. Ada paket khusus visa kerja jangka pendek dengan harga terjangkau.';
+                } else if (userMessage.toLowerCase().includes('hotel') || userMessage.toLowerCase().includes('akomodasi')) {
+                    response = 'Semua paket kami sudah termasuk akomodasi. Mulai dari hotel bintang 3 hingga bintang 5 tergantung paket yang Anda pilih.';
+                } else {
+                    response = 'Terima kasih atas pertanyaan Anda. Untuk informasi lebih lengkap, silakan hubungi customer service kami di +62 812-3456-7890.';
+                }
+                
+                botMsg.innerHTML = `
+                    <div class="bg-gray-100 rounded-lg p-3 inline-block">
+                        <p>${response}</p>
+                    </div>
+                `;
+                messages.appendChild(botMsg);
+                messages.scrollTop = messages.scrollHeight;
+            }, 1000);
+            
+            messages.scrollTop = messages.scrollHeight;
+        }
+        
+        function handleChatInput(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>
